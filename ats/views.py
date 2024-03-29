@@ -30,7 +30,7 @@ def input_pdf_setup(uploaded_file):
         pdf_parts = [
             {
                 "mime_type": "image/jpeg",
-                "data": base64.b64encode(img_byte_arr).decode()  # encode to base64
+                "data": base64.b64encode(img_byte_arr).decode()
             }
         ]
         return pdf_parts
@@ -48,7 +48,7 @@ def MatchingRate(request):
         """
 
         input_prompt = """
-        You are a skilled ATS (Applicant Tracking System) scanner with a deep understanding of Fullstack Development and ATS functionality, 
+        You are a skilled ATS (Applicant Tracking System) scanner with a deep understanding of Full Stack Development and ATS functionality, 
         your task is to evaluate the resume against the provided job description. give me the percentage of match if the resume matches
         the job description. output should come as a one and only percentage.
         """

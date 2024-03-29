@@ -107,3 +107,12 @@ class JobDetails(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Job.DoesNotExist:
             return Response({"error": "Job not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class JobDelete(APIView):
+    def post(self, request, recruiter_id, job_id):
+        try:
+            job = Job.objects.get(job_id=job_id, recruiter_id=recruiter_id)
+            job.delete()
+            return Response({"message": "Job deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found"}, status=status.HTTP_404_NOT_FOUND)

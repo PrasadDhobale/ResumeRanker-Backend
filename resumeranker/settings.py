@@ -55,8 +55,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
-CORS_ALLOW_ALL_ORIGINS = True  # This allows all origins; in production, you should restrict this to your front-end domain(s)
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
+
 ROOT_URLCONF = 'resumeranker.urls'
 
 TEMPLATES = [
