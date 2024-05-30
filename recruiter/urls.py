@@ -5,7 +5,9 @@ from .views import (
     JobRegisterView,
     RecruiterJobsView,
     JobDetails,
-    JobDelete
+    JobDelete,
+    GetApplicantCount,
+    GetAllApplicantDetails,
 )
 
 urlpatterns = [
@@ -13,7 +15,8 @@ urlpatterns = [
     path('login/', RecruiterLoginView.as_view(), name='recruiter_login'),
     path('create-job/', JobRegisterView.as_view(), name='create_job'),
     path('jobs/<int:recruiter_id>/', RecruiterJobsView.as_view(), name='recruiter-jobs'),
-    path('job/<int:job_id>/', JobDetails.as_view(), name='job_details'),    
-    path('job/delete/<int:recruiter_id>/<int:job_id>/', JobDelete.as_view(), name='job_delete'),  # Add URL for job deletion
-    # Add more URLs as needed
+    path('job/<int:job_id>/', JobDetails.as_view(), name='job_details'),
+    path('job/delete/<int:recruiter_id>/<int:job_id>/', JobDelete.as_view(), name='job_delete'),
+    path('job/getapplicationcount/<int:recruiter_id>/<int:job_id>/', GetApplicantCount.as_view(), name='applicantCount'),
+    path('job/getapplicantdetails/<int:recruiter_id>/<int:job_id>/', GetAllApplicantDetails.as_view(), name='applicantDetails'),
 ]

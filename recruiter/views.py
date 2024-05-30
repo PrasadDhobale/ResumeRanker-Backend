@@ -4,7 +4,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from .models import Recruiter
+from ats.models import Application
 from .models import Job  # Add this import statement
+from django.shortcuts import get_object_or_404
+from ats.serializers import ApplicationSerializer
+from django.http import JsonResponse
 
 from .serializers import RecruiterSerializer
 from .serializers import JobSerializer
@@ -12,7 +16,6 @@ from .serializers import JobSerializer
 import secrets
 import string
 from django.utils import timezone
-
 
 class RecruiterRegisterView(APIView):
     def post(self, request):
@@ -24,9 +27,6 @@ class RecruiterRegisterView(APIView):
             if Recruiter.objects.filter(email=data['email']).exists():
                 return Response({'error': 'Email is already registered'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Generate a random password with 12 characters (you can adjust the length)
-            random_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
-
             # Modify the request data to include the generated password
             # Set additional fields in the request data
             request_data = {
@@ -35,7 +35,7 @@ class RecruiterRegisterView(APIView):
                 'company_name': data['companyName'],
                 'email': data['email'],
                 'mobile_number': data['mobileNumber'],
-                'password': random_password,
+                'password': data['password'],
                 'verification_status': False,
                 'registration_time': timezone.now(),
             }
@@ -116,3 +116,23 @@ class JobDelete(APIView):
             return Response({"message": "Job deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Job.DoesNotExist:
             return Response({"error": "Job not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class GetApplicantCount(APIView):
+    def post(self, request, recruiter_id, job_id):
+        try:
+            job = Job.objects.get(pk=job_id, recruiter_id=recruiter_id)
+            applicant_count = Application.objects.filter(job=job).count()
+            return JsonResponse({'applicant_count': applicant_count}, status=status.HTTP_200_OK)
+        except Job.DoesNotExist:
+            return JsonResponse({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GetAllApplicantDetails(APIView):
+    def post(self, request, recruiter_id, job_id):
+        job = get_object_or_404(Job, pk=job_id, recruiter_id=recruiter_id)
+        
+        applications = Application.objects.filter(job=job)
+        
+        serializer = ApplicationSerializer(applications, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)

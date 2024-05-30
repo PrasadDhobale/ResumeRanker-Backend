@@ -6,8 +6,11 @@ from rest_framework.authtoken.models import Token
 from django.http import JsonResponse
 
 from .models import User, Resume
+from recruiter.models import Job
+from ats.models import Application
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import UserSerializer, ResumeSerializer
+from ats.serializers import JobSerializer, ApplicationSerializer
 from rest_framework.parsers import JSONParser
 import secrets
 import string
@@ -23,10 +26,7 @@ class UserRegisterView(APIView):
             # Check if the email already exists
             if User.objects.filter(email=data['email']).exists():
                 return Response({'error': 'Email is already registered'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Generate a random password with 12 characters (you can adjust the length)
-            random_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
-
+            
             # Modify the request data to include the generated password
             # Set additional fields in the request data
             request_data = {
@@ -34,7 +34,7 @@ class UserRegisterView(APIView):
                 'last_name': data['lastName'],
                 'email': data['email'],
                 'mobile_number': data['mobileNumber'],
-                'password': random_password,
+                'password': data['password'],
                 'verification_status': False,
                 'registration_time': timezone.now(),
             }
@@ -100,3 +100,68 @@ class GetResume(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Resume.DoesNotExist:
             return Response({"error": "Resumes not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class ResumeDeleteView(APIView):
+    
+    def post(self, request, resume_id):
+        try:
+            resume = Resume.objects.get(pk=resume_id)
+            resume.delete()
+            return Response({"message": "Resume deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Resume.DoesNotExist:
+            return Response({"error": "Resume not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class SubmitApplicationView(APIView):
+    
+    def post(self, request):
+        try:
+            data = request.data
+            userId = data.get('userId')
+            resumeId = data.get('resumeId')
+            jobId = data.get('jobId')
+            matchingRate = data.get('rate')
+                    
+            application_id = ''.join(secrets.choice(string.digits) for _ in range(12))
+            
+            request_data = {
+                'application_id' : application_id,
+                'user': userId,
+                'resume': resumeId,
+                'job': jobId,
+                'matching_rate': matchingRate,
+                'apply_time': timezone.now(),
+            }
+
+            serializer = ApplicationSerializer(data=request_data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({'success': True, 'message': 'Application submitted successfully'})
+            return JsonResponse({'success': False, 'error': serializer.errors}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+class ApplyForJobView(APIView):
+    def post(self, request, job_id):
+        try:
+            user_id = request.data.get('userId')
+            job = Job.objects.get(pk=job_id)
+            user = User.objects.get(pk=user_id)
+            applied = Application.objects.filter(job=job, user=user).exists()
+            return JsonResponse({'success': applied}, status=status.HTTP_200_OK)
+        except Job.DoesNotExist:
+            return JsonResponse({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GetResumeById(APIView):
+    def get(self, request, resume_id):
+        try:
+            resume = Resume.objects.get(resume_id=resume_id)
+            serializer = ResumeSerializer(resume)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Resume.DoesNotExist:
+            return Response({"error": "Resume not found"}, status=status.HTTP_404_NOT_FOUND)

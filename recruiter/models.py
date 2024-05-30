@@ -16,9 +16,7 @@ class Recruiter(models.Model):
 
     def __str__(self):
         return self.email
-    
-
-    from django.db import models
+        
 
 class Job(models.Model):
     recruiter = models.ForeignKey('Recruiter', on_delete=models.CASCADE)
@@ -34,3 +32,4 @@ class Job(models.Model):
 
     def __str__(self):
         return self.job_id
+
