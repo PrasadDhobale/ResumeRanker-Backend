@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import google.generativeai as genai
 import json
+from django.shortcuts import get_object_or_404
 from .models import Application, Selection
 from .serializers import SelectionSerializer
 from django.utils import timezone
@@ -16,10 +17,10 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-genai.configure(api_key="AIzaSyA3nWZeFQCagPfHR86o0f6kZnD6invO0Bc")
+genai.configure(api_key="AIzaSyAkC7ADGkfRyiJddP7g1cBl7yjnpgOGyVk")
 
 def get_gemini_response(input_text, pdf_content, prompt):
-    model = genai.GenerativeModel('gemini-pro-vision')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content([input_text, pdf_content[0], prompt])
     return response.text
 

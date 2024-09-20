@@ -1,7 +1,7 @@
 # recruiter/urls.py
 from django.urls import path
 from .views import UserRegisterView, UserLoginView, UploadResumeView, GetResume, ResumeDeleteView, SubmitApplicationView
-from .views import ApplyForJobView, GetResumeById
+from .views import ApplyForJobView, GetResumeById, GetApplications
 
 
 urlpatterns = [
@@ -13,4 +13,5 @@ urlpatterns = [
     path('application/', SubmitApplicationView.as_view(), name='submit_application'),
     path('apply/<int:job_id>/', ApplyForJobView.as_view(), name='apply_for_job'),
     path('getresume/<int:resume_id>/', GetResumeById.as_view(), name='get_resume_by_id'),
+    path('applications/<int:user_id>/', GetApplications.as_view(), name='get_resume'),
 ]

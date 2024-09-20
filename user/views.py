@@ -165,3 +165,12 @@ class GetResumeById(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Resume.DoesNotExist:
             return Response({"error": "Resume not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+class GetApplications(APIView):
+    def get(self, request, user_id, format=None):
+        user = get_object_or_404(User, id=user_id)
+        applications = Application.objects.filter(user=user)
+        serializer = ApplicationSerializer(applications, many=True)
+        return Response(serializer.data)
