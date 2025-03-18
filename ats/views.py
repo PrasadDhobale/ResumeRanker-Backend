@@ -17,7 +17,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-genai.configure(api_key="AIzaSyAkC7ADGkfRyiJddP7g1cBl7yjnpgOGyVk")
+genai.configure(api_key="AIzaSyAo3NNBs1nBxqtv7B1wnSIAnQvh_utCyS0")
 
 def get_gemini_response(input_text, pdf_content, prompt):
     model = genai.GenerativeModel('gemini-1.5-flash')
@@ -73,16 +73,25 @@ class MatchingRateView(APIView):
             Experience: {job_experience} Years
             """
 
-            input_prompt = f"""
+            getMatchingRatePrompt = f"""
             You are an experienced ATS (Applicant Tracking System) scanner with a deep understanding of {job_title} and its requirements. 
             Your task is to evaluate the resume against the provided job description. Please provide the percentage only of match between the resume and job requirements as output.
             Only Percentage I want, I want only matching rate. save in your memory. I don't want any other description, I just want the matching rate.
             """
 
+            getSuggestionsPrompt = f"""
+            Also Suggest 3 YouTube Video Search Links for example : https://www.youtube.com/results?search_query=java+developer+interview 
+            For Interview Preparation Related to {job_description}.
+            Give the strict key "suggestion" in response with json even dont give ```json.
+            Only Object should be there. NO PREAMBLE.
+            """
+            
             pdf_content = input_pdf_setup_from_base64(base64_pdf)
-            response = get_gemini_response(input_text, pdf_content, input_prompt)
+            matchingRate = get_gemini_response(input_text, pdf_content, getMatchingRatePrompt)
 
-            return JsonResponse({'message': 'File uploaded successfully', 'rate': response})
+            suggestions = get_gemini_response(input_text, pdf_content, getSuggestionsPrompt)
+            print(suggestions)
+            return JsonResponse({'message': 'File uploaded successfully', 'rate': matchingRate, 'suggestions': suggestions})
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:
